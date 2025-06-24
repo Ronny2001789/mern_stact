@@ -1,91 +1,131 @@
-import mongodb from "mongodb"
-const ObjectId = mongodb.ObjectID
+import mongodb from "mongodb";
+const ObjectId = mongodb.ObjectId;
 
-let movies 
+let movies;
 
-export default class MoviesDAO{ 
-    static async injectDB(conn){ 
-        if(movies){ 
-            return
-        }
-        try{ 
-            movies = await conn.db(process.env.MOVIEREVIEWS_NS)
-					.collection('movies')
-        } 
-        catch(e){
-            console.error(`unable to connect in MoviesDAO: ${e}`)
-        }
+export default class MoviesDAO {
+  static async injectDB(conn) {
+    if (movies) {
+      return;
+    }
+    try {
+      movies = await conn.db(process.env.MOVIEREVIEWS_NS).collection("movies");
+    } catch (e) {
+      console.error(`unable to connect in MoviesDAO: ${e}`);
+    }
+  }
+
+  static async getMovieById(id) {
+    try {
+      return await movies
+        .aggregate([
+          {
+            $match: {
+              _id: new ObjectId(id),
+            },
+          },
+          {
+            $lookup: {
+              from: "reviews",
+              localField: "_id",
+              foreignField: "movie_id",
+              as: "reviews",
+            },
+          },
+        ])
+        .next();
+    } catch (e) {
+      console.error(`something went wrong in getMovieById: ${e}`);
+      throw e;
+    }
+  }
+
+  static async getMovies({
+    filters = null,
+    page = 0,
+    moviesPerPage = 20,
+    sort = null,
+  } = {}) {
+    let query = {};
+    if (filters) {
+      if ("title" in filters) {
+        query = { $text: { $search: filters["title"] } };
+      } else if ("rated" in filters) {
+        query = { rated: filters["rated"] };
+      }
     }
 
-    static async getMovieById(id){        
-        try{                    
-            //use aggregate to provide a sequence of data aggregation operations                             
-            return await movies.aggregate([
-                {   //look for movie doc that matches specified id
-                    $match: {
-                        _id: new ObjectId(id),
-                    }
-                }    ,
-                // joins id field from movie doc to movie_id in reviews collection
-                { $lookup:
-                    {
-                        from: 'reviews',
-                        localField: '_id',
-                        foreignField: 'movie_id',
-                        as: 'reviews',
-                    }
-                }       
-            ]).next()            
-        }
-        catch(e){
-            console.error(`something went wrong in getMovieById: ${e}`)
-            throw e
-        }
+    try {
+      let cursor = movies.find(query);
+
+      if (sort) {
+        cursor = cursor.sort(sort);
+      }
+
+      cursor = cursor.limit(moviesPerPage).skip(moviesPerPage * page);
+
+      const moviesList = await cursor.toArray();
+      const totalNumMovies = await movies.countDocuments(query);
+
+      return { moviesList, totalNumMovies };
+    } catch (e) {
+      console.error(`Unable to issue find command: ${e}`);
+      return { moviesList: [], totalNumMovies: 0 };
     }
+  }
 
-
-    static async getMovies({// default filter
-        filters = null,
-        page = 0,
-        moviesPerPage = 20, // will only get 20 movies at once
-    } = {}){
-        let query 
-        if(filters){ 
-            if("title" in filters){ 
-                query = { $text: { $search: filters['title']}}
-            }else if("rated" in filters){ 
-                query = { "rated": { $eq: filters['rated']}} 
-            }                                
-        }
-
-        let cursor 
-        try{
-			cursor = await movies
-					.find(query)
-					.limit(moviesPerPage)
-					.skip(moviesPerPage * page)           
-            const moviesList = await cursor.toArray()
-            const totalNumMovies = await movies.countDocuments(query)
-            return {moviesList, totalNumMovies}
-        }
-        catch(e){
-            console.error(`Unable to issue find command, ${e}`)
-            return { moviesList: [], totalNumMovies: 0}
-        }
+  static async getRatings() {
+    try {
+      return await movies.distinct("rated");
+    } catch (e) {
+      console.error(`unable to get ratings: ${e}`);
+      return [];
     }
+  }
 
-    static async getRatings(){
-        let ratings = []
-        try{
-            //look for all possible ratings for all movies in movie object
-            ratings = await movies.distinct("rated") 
-            return ratings
-        }
-        catch(e){
-            //error message
-            console.error(`unable to get ratings, ${e}`)
-            return ratings
-        }
+  // New method to add a movie
+  static async addMovie(movieData) {
+    try {
+      const result = await movies.insertOne(movieData);
+      return result.insertedId;
+    } catch (e) {
+      console.error(`Unable to add movie: ${e}`);
+      return { error: e };
     }
+  }
 
+  // New method to update a movie by ID
+  static async updateMovie(id, updateData) {
+    try {
+      const result = await movies.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: updateData }
+      );
+      return result.modifiedCount;
+    } catch (e) {
+      console.error(`Unable to update movie: ${e}`);
+      return { error: e };
+    }
+  }
+
+  // New method to delete a movie by ID
+  static async deleteMovie(id) {
+    try {
+      const result = await movies.deleteOne({ _id: new ObjectId(id) });
+      return result.deletedCount;
+    } catch (e) {
+      console.error(`Unable to delete movie: ${e}`);
+      return { error: e };
+    }
+  }
+
+  // Optional utility method to get total count of movies
+  static async getTotalMoviesCount() {
+    try {
+      return await movies.countDocuments();
+    } catch (e) {
+      console.error(`Unable to count movies: ${e}`);
+      return 0;
+    }
+  }
 }

@@ -13,6 +13,9 @@ router.route('/').get(MoviesController.apiGetMovies)
 router.route("/id/:id").get(MoviesController.apiGetMovieById)
 router.route("/ratings").get(MoviesController.apiGetRatings)
 
+
+
+
 //CRUD functioning for reviews
 router
     .route("/review")
