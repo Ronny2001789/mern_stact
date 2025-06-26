@@ -9,6 +9,8 @@ import Row from 'react-bootstrap/Row';
 import Container from 'react-bootstrap/Container';
 
 
+
+
 const MoviesList = props => {
 
    const [movies, setMovies] = useState([])
@@ -121,6 +123,14 @@ const MoviesList = props => {
          find(searchRating, "rated")
       }
    }
+   // ✅ CLEAR FORM FUNCTION
+  const clearForm = () => {
+    setSearchTitle("");
+    setSearchRating("All Ratings");
+    setCurrentSearchMode("");
+    setCurrentPage(0);
+    setMovies([]);
+  }
 
    return (
       <div className="App">
@@ -186,6 +196,7 @@ const MoviesList = props => {
                   )
                })}
             </Row>
+            
 
          </Container><br />
          {/* ch 23 */}
@@ -196,6 +207,19 @@ const MoviesList = props => {
          >
             Get next {entriesPerPage} results
          </Button>
+         <Col md={4}>
+              <Button
+                variant="danger"
+                type="button"
+                onClick={clearForm}
+                className="mt-2"
+              >
+                Clear
+              </Button>
+            </Col>
+            
+          
+       
       </div>
    );
 }

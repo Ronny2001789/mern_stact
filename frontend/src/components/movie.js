@@ -83,13 +83,13 @@ const Movie = props => {
                               {props.user && props.user.id === review.user_id &&
                                  <Row>
                                     <Col><Link to={{
-                                       // path for reviews
+                                     // path for reviews
                                        pathname: "/movies/" +
                                           props.match.params.id +
                                           "/review",
                                        state: { currentReview: review }
                                        //link to edit
-                                    }}>Edit</Link>
+                                    }}>Edit</Link>  
                                     </Col>
                                     {/* link to delete */}
                                     <Col><Button variant="link" onClick={() => deleteReview(review._id, index)}>Delete</Button></Col>

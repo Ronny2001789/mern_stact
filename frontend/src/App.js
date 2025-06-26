@@ -6,8 +6,8 @@ import AddReview from "./components/add-review";
 import MoviesList from "./components/movies-list";
 import Movie from "./components/movie";
 import Login from "./components/login";
-import { Nav, Navbar } from 'react-bootstrap';
-import PurchaseForm from "./components/company";
+import { Nav, Navbar,Button } from 'react-bootstrap';
+
 
 function App() {
   const [user, setUser] = React.useState(null);
@@ -33,6 +33,7 @@ function App() {
             ) : (
               <Nav.Link as={Link} to="/login">Login</Nav.Link>
             )}
+             
           </Nav>
         </Navbar.Collapse>
       </Navbar>
@@ -48,7 +49,7 @@ function App() {
         <Route path="/login" render={(props) =>
           <Login {...props} login={login} />
         } />
-        <Route path="/purchase" component={PurchaseForm} />
+        {/* <Route path="/purchase" component={PurchaseForm} /> */}
       </Switch>
     </div>
   );
