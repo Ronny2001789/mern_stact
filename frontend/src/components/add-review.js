@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import MovieDataService from '../services/movies';
 import { Link } from 'react-router-dom';
 import { Form, Button } from 'react-bootstrap';
+import Greetingbanner from './greetinngbanner';
 
 
 const AddReview = props => {
@@ -60,10 +61,15 @@ const AddReview = props => {
 
    return (
       <div>
+
+          {/* 👇 Welcome message added here */}
+         <h5 style={{ marginBottom: '20px' }}>
+            Welcome {props.user ? props.user.name : 'Guest'}
+         </h5>
          {/* uses a ternary operator */}
          {submitted ? (
             <div>
-               <h4>Review submitted successfully</h4>
+               <h4>Review submitted successfully </h4>
                <Link to={'/movies/' + props.match.params.id}>
                   Back to Movie
                </Link>
@@ -71,7 +77,8 @@ const AddReview = props => {
          ) : (
             <Form>
                <Form.Group>
-                  <Form.Label>{editing ? "Edit" : "Create"} Review</Form.Label>
+                 
+                  <Form.Label>{editing ? "Edit" : "Create"} Review </Form.Label>
                   <Form.Control
                      type="text"
                      required
