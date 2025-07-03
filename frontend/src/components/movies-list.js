@@ -18,8 +18,6 @@ const MoviesList = props => {
    const [searchRating, setSearchRating] = useState("")
    const [ratings, setRatings] = useState(["All Ratings"])
   
-  
-  
    //ch 23
    // const [currentPage, setCurrentPage] = useState(0);//keep track of current page shown
    // const [entriesPerPage, setEntriesPerPage] = useState(0); //particular page
@@ -121,6 +119,7 @@ const MoviesList = props => {
       //ch 24
       setCurrentSearchMode("findByTitle")
       find(searchTitle, "title")// Pass the searchTitle and currentPage to the API call
+      
    }
    const findByRating = () => {
       //ch 24
